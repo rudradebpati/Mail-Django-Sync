@@ -1,6 +1,7 @@
 mail_fetch_env
 # Byte-compiled / optimized / DLL files
 __pycache__/
+*.pyc
 *.py[cod]
 *$py.class
 
@@ -36,6 +37,11 @@ settings_local.py
 .idea/
 *.swp
 *~
+
+# Migration Files
+**/migrations/**
+!**/migrations
+!**/migrations/__init__.py
 
 # Testing
 coverage/

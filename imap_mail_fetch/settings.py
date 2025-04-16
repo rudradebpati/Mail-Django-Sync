@@ -9,19 +9,20 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
 from pathlib import Path
-
+from dotenv import load_dotenv
+load_dotenv(override=True)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+DJANGO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-7xd&3ium8xn61p62irtr8)k+3j$bvw4oz0ll!)0m3jedagg5-1'
-
+SECRET_KEY = os.getenv('SECRET_KEY')
+API_KEY=os.getenv('API_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -37,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'master'
+    'rest_framework',
+    'master',
+    'user'
 ]
 
 MIDDLEWARE = [
@@ -80,7 +83,7 @@ DATABASES = {
     }
 }
 
-
+AUTH_USER_MODEL = 'user.UserDetails'
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -124,28 +127,78 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Logging
-
+LOG_ROOT = os.path.join(DJANGO_ROOT, "logs")
+if not os.path.exists(LOG_ROOT):
+    os.makedirs(LOG_ROOT)
+if not os.path.exists(LOG_ROOT + "/django"):
+    os.makedirs(LOG_ROOT + "/django")
+if not os.path.exists(LOG_ROOT + "/django/debug"):
+    os.makedirs(LOG_ROOT + "/django/debug")
+if not os.path.exists(LOG_ROOT + "/django/critical"):
+    os.makedirs(LOG_ROOT + "/django/critical")
+if not os.path.exists(LOG_ROOT + "/django/error"):
+    os.makedirs(LOG_ROOT + "/django/error")
+if not os.path.exists(LOG_ROOT + "/django/info"):
+    os.makedirs(LOG_ROOT + "/django/info")
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] [%(module)s.%(funcName)s] [%(process)d.%(thread)d] %(message)s",
+            "datefmt": "%d/%b/%Y %H:%M:%S",
         },
-        'file': {
-        'level': 'ERROR',
-        'class': 'logging.RotatingFileHandler',
-        'filename': 'errors.log',
-        'backupCount': 5,  # Keep 5 backup logs
-        'maxBytes': 1024 * 1024 * 5,  # 5 MB
-
+        "simple": {"format": "[%(asctime)s] %(levelname)s %(message)s"},
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "INFO",
+            "formatter": "verbose",
+        },
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(DJANGO_ROOT, "logs/django/debug/django_debug.log"),
+            "maxBytes": 1024 * 1024 * 100,  # Max 100 MB
+            #'when': 'D', # this specifies the interval
+            #'interval': 1, # defaults to 1, only necessary for other values
+            "backupCount": 1,  # how many backup file to keep, 9 hrs
+            "formatter": "verbose",
+        },
+        "fileerror": {
+            "level": "ERROR",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(DJANGO_ROOT, "logs/django/error/django_error.log"),
+            "maxBytes": 1024 * 1024 * 100,  # Max 100 MB
+            #'when': 'D', # this specifies the interval
+            #'interval': 1, # defaults to 1, only necessary for other values
+            "backupCount": 1,  # how many backup file to keep, 9 hrs
+            "formatter": "verbose",
+        },
+        "fileinfo": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(DJANGO_ROOT, "logs/django/info/django_info.log"),
+            "maxBytes": 1024 * 1024 * 100,  # Max 100 MB
+            #'when': 'D', # this specifies the interval
+            #'interval': 1, # defaults to 1, only necessary for other values
+            "backupCount": 1,  # how many backup file to keep, 9 hrs
+            "formatter": "verbose",
         },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
-            'propagate': True,
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
+        },
+        "django.request": {
+            "handlers": ["fileerror"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "ERROR"),
+        },
+        "": {
+            "handlers": ["fileinfo"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
         },
     },
 }

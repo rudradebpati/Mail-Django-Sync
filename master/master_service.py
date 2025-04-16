@@ -5,8 +5,8 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 import logging
-from email import utils
-from typing import List, Dict, Any,TypedDict
+from email import utils, errors
+from typing import List,TypedDict
 
 # Configure logging
 error_logger = logging.getLogger(__name__)
@@ -82,7 +82,7 @@ def fetch_emails()->List[EmailData]:
     except imaplib2.IMAP4.error as e:
         error_logger.error(f"IMAP error: {e}")
         return []
-    except email.errors.MessageError as e:
+    except errors.MessageError as e:
         error_logger.error(f"Email parsing error: {e}")
         return []
     except Exception as e:
