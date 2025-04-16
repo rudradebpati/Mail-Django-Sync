@@ -1,0 +1,9 @@
+SECRET_KEY = 'django-insecure-7xd&3ium8xn61p62irtr8)k+3j$bvw4oz0ll!)0m3jedagg5-1'
+API_KEY='<YOUR SHA@%^ HASHED KEY>'
+
+
+# Email configurations here
+EMAIL_HOST='<YOUR_TARGET_EMAIL_HOST>'
+EMAIL_USER='<YOUR_EMAIL_ID>'
+EMAIL_PASS='<YOUR_MAIL_PASSWORD>'
+
